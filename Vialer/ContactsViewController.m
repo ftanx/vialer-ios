@@ -91,6 +91,9 @@ static NSTimeInterval const ContactsViewControllerReachabilityBarAnimationDurati
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
 
     self.searchBar.barTintColor = [defaultConfiguration.colorConfiguration colorForKey:ConfigurationContactSearchBarBarTintColor];
+
+    self.navigationController.view.backgroundColor = [defaultConfiguration.colorConfiguration colorForKey:ConfigurationNavigationBarBarTintColor];
+
     self.myPhoneNumberLabel.text = self.currentUser.outgoingNumber;
 }
 
@@ -141,6 +144,11 @@ static NSTimeInterval const ContactsViewControllerReachabilityBarAnimationDurati
     contactViewController.allowsActions = NO;
     contactViewController.delegate = self;
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:contactViewController];
+
+    Configuration *config = [Configuration defaultConfiguration];
+
+    nav.view.backgroundColor = [config.colorConfiguration colorForKey:ConfigurationNavigationBarBarTintColor];
+
     [self presentViewController:nav animated:YES completion:nil];
 }
 
@@ -330,6 +338,7 @@ static NSTimeInterval const ContactsViewControllerReachabilityBarAnimationDurati
 }
 
 #pragma mark - ReachabilityBarViewControllerDelegate
+
 - (void)hideReachabilityBar {
     self.reachabilityBarHeigthConstraint.constant = 0.0;
     self.reachabilityBar.view.hidden = YES;
