@@ -16,6 +16,7 @@
 @interface AvailabilityViewController()
 @property (nonatomic, weak) NSIndexPath *lastSelected;
 @property (nonatomic, strong) AvailabilityModel *availabilityModel;
+- (IBAction)loadUserDestinationsWithRefreshControl:(UIRefreshControl *)sender;
 @end
 
 static NSString * const AvailabilityAddFixedDestinationSegue = @"AddFixedDestinationSegue";
@@ -23,25 +24,23 @@ static NSString * const AvailabilityViewControllerAddFixedDestinationPageURLWith
 
 @implementation AvailabilityViewController
 
+- (void)awakeFromNib {
+    [super awakeFromNib];
+     self.refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString: NSLocalizedString(@"Loading availability options...", nil)];
+}
+
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [VialerGAITracker trackScreenForControllerWithName:NSStringFromClass([self class])];
-    [self loadUserDestinations];
+
+    [self.refreshControl beginRefreshing];
+    [self.tableView setContentOffset:CGPointMake(0, -self.refreshControl.frame.size.height) animated:YES];
+    [self loadUserDestinationsWithRefreshControl:self.refreshControl];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.tableView.tintColor = [[Configuration defaultConfiguration].colorConfiguration colorForKey:ConfigurationAvailabilityTableViewTintColor];
-}
-
-- (UIRefreshControl *)refreshControl {
-    UIRefreshControl *refreshControl = [super refreshControl];
-    if (!refreshControl) {
-        self.refreshControl = [[UIRefreshControl alloc] init];
-        self.refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString: NSLocalizedString(@"Loading availability options...", nil)];
-        [self.refreshControl addTarget:self action:@selector(loadUserDestinations) forControlEvents:UIControlEventValueChanged];
-    }
-    return [super refreshControl];
 }
 
 - (AvailabilityModel *)availabilityModel {
@@ -51,15 +50,8 @@ static NSString * const AvailabilityViewControllerAddFixedDestinationPageURLWith
     return _availabilityModel;
 }
 
-- (void)loadUserDestinations {
-    [self.refreshControl beginRefreshing];
-    // A bug in RefreshControl on a tableview within a navigation controller
-    // http://stackoverflow.com/a/14719658
-    [self.tableView setContentOffset:CGPointMake(0, -self.refreshControl.frame.size.height) animated:YES];
-
+- (IBAction)loadUserDestinationsWithRefreshControl:(UIRefreshControl *)sender {
     [self.availabilityModel getUserDestinations:^(NSString *localizedErrorString) {
-        [self.tableView setContentOffset:CGPointMake(0,0) animated:YES];
-        [self.refreshControl endRefreshing];
         if (localizedErrorString) {
             [self presentViewController:[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", nil)
                                                                             message:localizedErrorString
@@ -69,6 +61,7 @@ static NSString * const AvailabilityViewControllerAddFixedDestinationPageURLWith
         }else{
             [self.tableView reloadData];
         }
+        [self.refreshControl endRefreshing];
     }];
 }
 
