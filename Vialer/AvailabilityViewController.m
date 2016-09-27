@@ -16,7 +16,6 @@
 @interface AvailabilityViewController()
 @property (nonatomic, weak) NSIndexPath *lastSelected;
 @property (nonatomic, strong) AvailabilityModel *availabilityModel;
-- (IBAction)loadUserDestinationsWithRefreshControl:(UIRefreshControl *)sender;
 @end
 
 static NSString * const AvailabilityAddFixedDestinationSegue = @"AddFixedDestinationSegue";
